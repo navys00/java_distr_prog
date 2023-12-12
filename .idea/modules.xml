@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/gomoku_rmi/gomoku_rmi.iml" filepath="$PROJECT_DIR$/gomoku_rmi/gomoku_rmi.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/java_distr_prog.iml" filepath="$PROJECT_DIR$/.idea/java_distr_prog.iml" />
     </modules>
   </component>

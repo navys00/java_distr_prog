@@ -21,23 +21,23 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
-public class HelloAppliation extends Application {
+public class HelloApplication extends Application {
 
-    private static final int Game_Board_Size = 15;
+    private static final int Game_Place_Size = 15;
     static List<Integer> localBoard = new ArrayList<>();
     static int playerCount = 0;
     static int step = 0;
-    private static final String UNIQUE_BINDING_NAME = "server.board";
-    private static final int PORT = 3000;
+    public Interface board;
 
     @Override
     public void start(Stage stage) throws IOException, NotBoundException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloAppliation.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 50 * Game_Board_Size, 50 * Game_Board_Size);
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 750, 750);
 
-        final Registry registry = LocateRegistry.getRegistry(PORT);
-        Interface board = (Interface) registry.lookup(UNIQUE_BINDING_NAME);
+        final Registry registry = LocateRegistry.getRegistry(3000);
+        board = (Interface) registry.lookup("server.board");
         playerCount = board.connect();
         if (playerCount == 0) return;
         stage.setTitle("Client " + playerCount);
@@ -48,84 +48,121 @@ public class HelloAppliation extends Application {
         vBox.setAlignment(Pos.CENTER);
         ObservableList<Node> hBoxes = vBox.getChildren();
 
+        IntStream.range(0, Game_Place_Size)
+                .forEach(x -> {
+                    HBox hBox = new HBox();
+                    hBoxes.add(hBox);
+                    hBox.setSpacing(0.5);
+                    hBox.setAlignment(Pos.CENTER);
+                    IntStream.range(0, Game_Place_Size)
+                            .forEach(y -> {
+                                Rectangle rectangle = createRectangle(x, y);
+                                hBox.getChildren().add(rectangle);
+                            });
+                });
 
-        for (int x = 0; x < Game_Board_Size; x++) {
-            HBox hBox = new HBox();
-            hBoxes.add(hBox);
-            hBox.setSpacing(0.5);
-            hBox.setAlignment(Pos.CENTER);
-            for (int y = 0; y < Game_Board_Size; y++) {
-                Rectangle rectangle = new Rectangle(48, 48);
-                rectangle.setFill(Color.WHITE);
-                rectangle.setStroke(Color.BLACK);
-                rectangle.setCursor(Cursor.HAND);
-                rectangle.setId("rect" + (x * Game_Board_Size + y));
-                int finalX = x;
-                int finalY = y;
-                rectangle.setOnMouseClicked(e -> {
-                    if (playerCount == step) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while(true) {
+                        updateGameState();
+                        fill(scene);
+                        updatePlayerTurnTitle(step, playerCount, stage);
                         try {
-                            board.Move(finalX, finalY);
-                        } catch (RemoteException ex) {
-                            throw new RuntimeException(ex);
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        if (CheckGameEnd(step, playerCount, stage)) {
+                            break;
                         }
                     }
-                });
-                hBox.getChildren().add(rectangle);
-            }
-        }
-
-        new Thread(() -> {
-            while(true) {
-                try {
-                    localBoard = board.getBoard();
-                    step = board.getStep();
-                    fill(scene);
-                    new Thread(() -> Platform.runLater(() -> {
-                        if (step == playerCount) {
-                            stage.setTitle("Client " + playerCount + " YOUR TURN");
-                        } else {
-                            stage.setTitle("Client " + playerCount);
-                        }
-                    })).start();
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
-                }
-
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-                if (step == 3 || step == 4) {
-                    new Thread(() -> Platform.runLater(() -> {
-                        if (step == 3 && playerCount == 1) {
-                            stage.setTitle("YOU WON");
-                        }
-                        if (step == 4 && playerCount == 2) {
-                            stage.setTitle("YOU WON");
-                        }
-                    })).start();
-                    break;
                 }
             }
         }).start();
     }
-
+    private void updatePlayerTurnTitle(int step, int playerCount, Stage stage) {
+        Platform.runLater(() -> {
+            if (step == playerCount) {
+                stage.setTitle("Client " + playerCount + " YOUR TURN");
+            } else {
+                stage.setTitle("Client " + playerCount);
+            }
+        });
+    }
+    private boolean CheckGameEnd(int step, int playerCount, Stage stage) {
+        if (step == 3 || step == 4) {
+            Platform.runLater(() -> {
+                if (step == 3 && playerCount == 1) {
+                    stage.setTitle("YOU WON");
+                }
+                if (step == 4 && playerCount == 2) {
+                    stage.setTitle("YOU WON");
+                }
+            });
+            return true;
+        }
+        return false;
+    }
+    private void updateGameState() throws RemoteException {
+        localBoard = board.getBoard();
+        step = board.getStep();
+    }
     private void fill(Scene scene) {
         VBox vBox = (VBox) scene.lookup("#vBox");
         ObservableList<Node> hBoxes = vBox.getChildren();
 
-        for (int i = 0; i < Game_Board_Size; i++) {
+        for (int i = 0; i < Game_Place_Size; i++) {
             HBox hBox = (HBox) hBoxes.get(i);
-            for (int j = 0; j < Game_Board_Size; j++) {
+            for (int j = 0; j < Game_Place_Size; j++) {
                 Rectangle rectangle = (Rectangle) hBox.getChildren().get(j);
-                if (localBoard.get(i * Game_Board_Size + j) == 1) {
-                    rectangle.setFill(Color.BLACK);
-                }
-                if (localBoard.get(i * Game_Board_Size + j) == 2) {
-                    rectangle.setFill(Color.ORANGE);
-                }
+                int index = i * Game_Place_Size + j;
+                setColorRectangle(rectangle,getValueFromLocalBoard(index));
+            }
+        }
+    }
+    private int getValueFromLocalBoard(int index) {
+        return localBoard.get(index);
+    }
+    private void setColorRectangle(Rectangle rectangle, int value){
+        if (value == 1) {
+            rectangle.setFill(Color.BLACK);
+        } else if (value == 2) {
+            rectangle.setFill(Color.ORANGE);
+        }
+    }
+    private Rectangle createRectangle(int x, int y) {
+        Rectangle rectangle = createLabeledRectangle();
+        setProperties(rectangle, x, y);
+        attachClickHandler(rectangle, x, y);
+        return rectangle;
+    }
+
+    private Rectangle createLabeledRectangle() {
+        return new Rectangle(48, 48);
+    }
+
+    private void setProperties(Rectangle rectangle, int x, int y) {
+        rectangle.setFill(Color.WHITE);
+        rectangle.setStroke(Color.BLACK);
+        rectangle.setCursor(Cursor.HAND);
+        rectangle.setId("rect" + (x * Game_Place_Size + y));
+    }
+
+    private void attachClickHandler(Rectangle rectangle, int x, int y) {
+        rectangle.setOnMouseClicked(e -> handleRectangleClick(x, y));
+    }
+    // Метод для обработки нажатия на прямоугольник
+    private void handleRectangleClick(int x, int y) {
+        if (playerCount == step) {
+            try {
+                board.Move(x, y);
+            } catch (RemoteException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }

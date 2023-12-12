@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface Interface extends Remote {
 
-    int addPlayer() throws RemoteException;
-    void move(int x, int y) throws RemoteException;
-    List<Integer> getField() throws RemoteException;
-    int getTurn() throws RemoteException;
+    List<Integer> getBoard() throws RemoteException;
+    void Move(int x, int y) throws RemoteException;
+    int connect() throws RemoteException;
+    int getStep() throws RemoteException;
 }

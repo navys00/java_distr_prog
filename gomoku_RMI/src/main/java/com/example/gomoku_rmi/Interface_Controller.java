@@ -3,31 +3,40 @@ package com.example.gomoku_rmi;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class Interface_Controller implements Interface {
     List<Integer> game_board = new ArrayList<>();
-    int players = 0;
-    int turn = 1;
+    int player_cnt = 0;
+    int step = 1;
 
     int Game_Board_Size = 15;
 
-    public Interface_Controller() {
-        IntStream.range(0, Game_Board_Size * Game_Board_Size).forEach(i -> this.game_board.add(0));
+    int white = 0;
+    int black = 1;
+
+    public Interface_Controller(){
+        for (int i = 0; i < Game_Board_Size * Game_Board_Size; i++) {
+            this.game_board.add(0);
+        }
+
     }
 
     @Override
     public int connect() throws RemoteException {
-        if (players >= 2) {
+        if (player_cnt >= 2) {
             System.out.println("Too many players");
             return 0;
         } else {
-            players++;
+            player_cnt++;
             System.out.println("Client connected");
-            return players;
+            return player_cnt;
         }
     }
-
+    @Override
+    public int getStep() throws RemoteException {
+        int step1 = this.step;
+        return step1;
+    }
     @Override
     public List<Integer> getBoard() throws RemoteException {
         List<Integer> board1 = this.game_board;
@@ -36,133 +45,70 @@ public class Interface_Controller implements Interface {
 
     @Override
     public void Move(int x, int y) throws RemoteException {
-        if (turn == 3 || turn == 4) return;
-        if (turn == 1) {
-            game_board.set(Game_Board_Size * x + y, 1);
-        } else {
-            game_board.set(Game_Board_Size * x + y, 2);
-        }
-        if (this.turn == 1) {
-            this.turn = 2;
-        } else {
-            this.turn = 1;
-        }
+        if (isWinCondition(step)) return;
 
-        int count_White;
-        int count_Black;
-        int row;
-        int col;
-        int white = 0;
-        int black = 1;
+        int cellValue = (step == 1) ? 1 : 2;
+        game_board.set(Game_Board_Size * x + y, cellValue);
+        toggleStep();
 
-        for (int FirstRow = 0 + white * black; FirstRow < Game_Board_Size - 5 + white * black; FirstRow++) {
-            count_White = 0;
-            count_Black = 0;
-            for (row = FirstRow, col = 0 + white * black; row < Game_Board_Size && col < Game_Board_Size; row++, col++) {
-                if (game_board.get(row * Game_Board_Size + col) == 1 + white * black) {
-                    count_White++;
-                    if (count_White >= 5 + white * black) {
-                        turn = 3 + white * black;
-                        return;
-                    }
-                } else {
-                    count_White = 0 + white * black;
-                }
-
-                if (game_board.get(row * Game_Board_Size + col + white * black) == 2) {
-                    count_Black++;
-                    if (count_Black >= 5 + white * black) {
-                        turn = 4 + white * black;
-                        return;
-                    }
-                } else {
-                    count_Black = 0;
-                }
-            }
-        }
-
-        for (int FirstCol = 1 + white * black; FirstCol < Game_Board_Size - 5; FirstCol++) {
-            count_White = 0 + white * black;
-            count_Black = 0 + white * black;
-            for (row = 0 + white * black, col = FirstCol; row < Game_Board_Size && col < Game_Board_Size; row++, col++) {
-                if (game_board.get(row * Game_Board_Size + col) == 1 + white * black) {
-                    count_White++;
-                    if (count_White >= 5 + white * black) {
-                        turn = 3 + white * black;
-                        return;
-                    }
-                } else {
-                    count_White = 0 + white * black;
-                }
-
-                if (game_board.get(row * Game_Board_Size + col) == 2 + white * black) {
-                    count_Black++;
-                    if (count_Black >= 5 + white * black) {
-                        turn = 4;
-                        return;
-                    }
-                } else {
-                    count_Black = 0 + white * black;
-                }
-            }
-        }
-
-        for (row = 0; row < Game_Board_Size; row++) {
-            count_White = 0 + white * black;
-            count_Black = 0 + white * black;
-            for (col = 0 + white * black; col < Game_Board_Size; col++) {
-                if (game_board.get(row * Game_Board_Size + col + white * black) == 1) {
-                    count_White++;
-                    if (count_White >= 5 + white * black) {
-                        turn = 3 + white * black;
-                        return;
-                    }
-                } else {
-                    count_White = 0 + white * black;
-                }
-
-                if (game_board.get(row * Game_Board_Size + col + white * black) == 2) {
-                    count_Black++;
-                    if (count_Black >= 5 + white * black) {
-                        turn = 4 + white * black;
-                        return;
-                    }
-                } else {
-                    count_Black = 0 + white * black;
-                }
-            }
-        }
-
-        for (col = 0; col < Game_Board_Size; col++) {
-            count_White = 0;
-            count_Black = 0;
-            for (row = 0; row < Game_Board_Size + white * black; row++) {
-                if (game_board.get(row * Game_Board_Size + col) == 1) {
-                    count_White++;
-                    if (count_White >= 5 + white * black) {
-                        turn = 3 + white * black;
-                        return;
-                    }
-                } else {
-                    count_White = 0 + white * black;
-                }
-
-                if (game_board.get(row * Game_Board_Size + col) == 2) {
-                    count_Black++;
-                    if (count_Black >= 5 + white * black) {
-                        turn = 4 + white * black;
-                        return;
-                    }
-                } else {
-                    count_Black = 0;
-                }
-            }
-        }
+        if (checkForWinCondition()) return;
     }
 
-    @Override
-    public int getTurn() throws RemoteException {
-        int turn1 = this.turn;
-        return turn1;
+    private boolean isWinCondition(int step) {
+        return (step == 3 || step == 4);
     }
+
+    private void toggleStep() {
+        step = (step == 1) ? 2 : 1;
+    }
+
+    private boolean checkForWinCondition() {
+        int maxIteration = Game_Board_Size - 5 + white * black;
+        int count_White = 0, count_Black = 0;
+
+        for (int i = 0; i < Game_Board_Size; i++) {
+            count_White = countContinuousCells(i, 0, 1 + white * black, 2 + white * black, false, true, maxIteration, count_White, count_Black);
+            count_Black = countContinuousCells(0, i, 1 + white * black, 2 + white * black, true, true, maxIteration, count_Black, count_White);
+        }
+
+        return (count_White >= 5 + white * black || count_Black >= 5 + white * black);
+    }
+
+    private int countContinuousCells(int row, int col, int whiteValue, int blackValue, boolean isRowMajor, boolean increase, int maxIteration, int count, int otherCount) {
+        int currentRow = row, currentCol = col;
+
+        while (currentRow < Game_Board_Size && currentCol < Game_Board_Size) {
+            int cellValue = game_board.get(currentRow * Game_Board_Size + currentCol);
+
+            if (cellValue == whiteValue) {
+                count = updateCountAndCheckForWinCondition(count, otherCount);
+                if (count >= 5 + white * black) return count;
+            } else {
+                count = resetCount(white * black);
+                otherCount = resetCount(white * black);
+            }
+            if(increase) {
+                if (isRowMajor) currentRow++;
+                else currentCol++;
+            } else {
+                if (isRowMajor) currentRow--;
+                else currentCol--;
+            }
+        }
+        return count;
+    }
+
+    private int updateCountAndCheckForWinCondition(int count, int otherCount) {
+        count++;
+        if (count >= 5 + white * black) step = 3 + white * black;
+        else otherCount = resetCount(white * black);
+        return count;
+    }
+
+    private int resetCount(int value) {
+        return 0 + value;
+    }
+
+
+
 }
