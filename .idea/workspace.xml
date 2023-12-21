@@ -5,18 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="261c23cb-fd09-4e4d-b270-eb23698595ef" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku_RMI/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Client.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Client_Data.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/HelloAppliation.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/HelloApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/HelloApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Interface.java" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Interface.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Interface_Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Interface_Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Server.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gomoku_RMI/src/main/java/com/example/gomoku_rmi/Server_Data.java" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/gomoku_ws/.idea/gomoku_ws.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,8 +33,9 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
-    "last_opened_file_path": "D:/вуз - 4 курс/распределенное программирование/java_distr_prog",
+    "last_opened_file_path": "D:/вуз - 4 курс/распределенное программирование/java_distr_prog/gomoku_ws",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -60,7 +51,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1702395600574</updated>
-      <workItem from="1702395602095" duration="2026000" />
+      <workItem from="1702395602095" duration="9501000" />
     </task>
     <servers />
   </component>
